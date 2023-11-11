@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# TODO
-app_link="https://www.apkmirror.com/wp-content/themes/APKMirror/download.php?id=5320087&key=5633073aa64fc131c8d940372a45c9dddcdeb74b&forcebaseapk=true"
+APP_LINKS=()
 
 if [[ -z "$3" ]]; then
-  echo "Define tags for cli, pathces, integrations (order matter)"
+  echo "Define tags kind of args for cli, pathces, integrations like 4.1.0 2.196.0 0.121.0 (order matter)"
   exit 1
 fi
 
@@ -18,7 +17,6 @@ cli_path="tools/cli"
 pathces_path="tools/patches"
 integrations_path="tools/integrations"
 
-app_name="app.apk"
 
 if [[ $(ls | grep $root) == "" ]]; then
   mkdir -p $root/$cli_path $root/$pathces_path $root/$integrations_path $root/apps $root/patched_apps
@@ -43,14 +41,21 @@ fi
 
 rm -rf $root/apps/*
 
-wget --user-agent="Mozzila" $app_link -O apps/$app_name
+count=1
 
-java -jar $cli_path/$cli patch \
+for i in ${APP_LINKS[@]}; do
+  app_name=app$count.apk
+  wget --user-agent="Mozzila" $i -O apps/$app_name
+
+  java -jar $cli_path/$cli patch \
   -b $pathces_path/$patches \
   -m $integrations_path/$integrations \
   -o patched_apps/$app_name \
-  apps/app.apk
+  apps/$app_name
+
+  adb install patched_apps/$app_name
+
+  count=$((count+1))
+done
 
 rm -rf revanced-resource-cache.
-
-adb install patched_apps/$app_name
