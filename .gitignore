@@ -1,1 +1,5 @@
-/revanced
+.venv
+tools
+apps
+patched_apps
+*.DS_Store
